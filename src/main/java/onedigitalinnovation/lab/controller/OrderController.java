@@ -5,38 +5,33 @@ import onedigitalinnovation.lab.domain.OrderStatus;
 import onedigitalinnovation.lab.dto.CreateOrderRequest;
 import onedigitalinnovation.lab.dto.OrderResponse;
 import onedigitalinnovation.lab.repository.OrderRepository;
+import onedigitalinnovation.lab.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
 
     private final OrderRepository repository;
+    private final OrderService orderService;
 
-    public OrderController(OrderRepository repository) {
+
+    public OrderController(OrderRepository repository,OrderService orderService) {
         this.repository = repository;
+        this.orderService = orderService;
     }
 
     @PostMapping
     public ResponseEntity<OrderResponse> create(@RequestBody CreateOrderRequest request) {
-        Order order = new Order();
-        order.setName(request.name());
-        order.setEmail(request.email());
-        order.setAddress(request.address());
-        order.setObservation(request.observation());
-        order.setStatus(OrderStatus.CREATED);
-        order.setCreatedAt(LocalDateTime.now());
-
-        Order saved = repository.save(order);
+        Order saved = orderService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(OrderResponse.from(saved));
     }
-
     @GetMapping("/{id}")
     public OrderResponse findById(@PathVariable Long id) {
         return OrderResponse.from(findOrThrow(id));
@@ -99,5 +94,9 @@ public class OrderController {
         return new ResponseStatusException(
                 HttpStatus.CONFLICT,
                 "Cannot " + action + " an order with status " + order.getStatus());
+    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleValidation(IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
 }
