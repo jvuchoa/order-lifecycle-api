@@ -2,6 +2,7 @@ package onedigitalinnovation.lab.controller;
 
 import onedigitalinnovation.lab.domain.InvalidOrderTransitionException;
 import onedigitalinnovation.lab.dto.CreateOrderRequest;
+import onedigitalinnovation.lab.dto.OrderHistoryResponse;
 import onedigitalinnovation.lab.dto.OrderResponse;
 import onedigitalinnovation.lab.service.OrderService;
 import org.springframework.http.HttpStatus;
@@ -55,6 +56,10 @@ public class OrderController {
     @PatchMapping("/{id}/cancel")
     public OrderResponse cancel(@PathVariable Long id) {
         return OrderResponse.from(service.cancel(id));
+    }
+    @GetMapping("/{id}/history")
+    public List<OrderHistoryResponse> history(@PathVariable Long id) {
+        return service.findHistory(id).stream().map(OrderHistoryResponse::from).toList();
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
