@@ -74,6 +74,10 @@ public class Order {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+    public void pay()     { this.status = status.state().pay(); }
+    public void send()    { this.status = status.state().send(); }
+    public void deliver() { this.status = status.state().deliver(); }
+    public void cancel()  { this.status = status.state().cancel(); }
 
 
 
